@@ -887,6 +887,8 @@ export const dict = {
   "settings.desktop.wsl.title": "WSL 集成",
   "settings.desktop.wsl.description": "在 Windows 的 WSL 环境中运行 OpenCode 服务器。",
 
+  "settings.general.row.design.title": "设计",
+  "settings.general.row.design.description": "选择布局。主题、会话与连接保持不变。",
   "settings.general.section.appearance": "外观",
   "settings.general.section.advanced": "高级",
   "settings.general.section.notifications": "系统通知",

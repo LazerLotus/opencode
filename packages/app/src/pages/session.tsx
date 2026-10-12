@@ -1,3 +1,4 @@
+import { resolveWorldDesign } from "@/components/world-design"
 import type { FilePart, Project, UserMessage, VcsFileDiff } from "@opencode-ai/sdk/v2"
 import { getFilename } from "@opencode-ai/core/util/path"
 import { useDialog } from "@opencode-ai/ui/context/dialog"
@@ -362,6 +363,7 @@ export default function Page() {
   const sdk = useSDK()
   const serverSDK = useServerSDK()
   const settings = useSettings()
+  const world = createMemo(() => resolveWorldDesign(settings.appearance.design()))
   const platform = usePlatform()
   const prompt = usePrompt()
   const comments = useComments()
@@ -480,7 +482,7 @@ export default function Page() {
   const sessionPanelAvailable = createMemo(() => {
     const width = panelRowWidth()
     if (width === undefined) return undefined
-    return width - (settings.general.newLayoutDesigns() ? 8 : 0)
+    return width - world().gap
   })
   const sessionPanelMax = createMemo(() => {
     const available = sessionPanelAvailable()
@@ -499,7 +501,7 @@ export default function Page() {
   const sessionPanelWidth = createMemo(() => {
     if (!desktopSidePanelOpen()) return "100%"
     if (desktopSessionResizeOpen()) return `${sessionPanelResizedWidth()}px`
-    return `calc(100% - ${layout.fileTree.width()}px)`
+    return `calc(100% - ${layout.fileTree.width()}px - ${world().gap}px)`
   })
   const centered = createMemo(() => isDesktop() && (newSessionDesign() || !desktopReviewOpen()))
   const desktopV2PanelLayout = createMemo(() =>
@@ -2250,15 +2252,19 @@ export default function Page() {
     <SessionRouteFrame>
       <SessionHeader />
       <div
+        data-world-panels
         ref={panelRow}
-        class="flex-1 min-h-0 flex flex-col md:flex-row"
+        class="flex-1 min-h-0 flex flex-col"
         classList={{
+          "md:flex-row": world().navigation === "start",
+          "md:flex-row-reverse": world().navigation === "end",
           "gap-2 p-2": settings.general.newLayoutDesigns(),
         }}
       >
         <Show when={!isDesktop() && !!params.id && !settings.general.newLayoutDesigns()}>{mobileTabs()}</Show>
 
         <div
+          data-world-conversation
           classList={{
             "@container relative shrink-0 flex flex-col min-h-0 h-full flex-1 md:flex-none transition-[width]": true,
             "duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width] motion-reduce:transition-none":
@@ -2286,9 +2292,11 @@ export default function Page() {
             <div onPointerDown={() => size.start()}>
               <ResizeHandle
                 classList={{
-                  "-end-1": settings.general.newLayoutDesigns(),
+                  "-end-1": settings.general.newLayoutDesigns() && world().navigation === "start",
+                  "-start-1": settings.general.newLayoutDesigns() && world().navigation === "end",
                 }}
                 direction="horizontal"
+                edge={world().navigation === "end" ? "start" : "end"}
                 size={sessionPanelResizedWidth()}
                 min={SESSION_PANEL_WIDTH_MIN}
                 max={sessionPanelMax()}
@@ -2321,7 +2329,7 @@ export default function Page() {
         </Show>
         <Show when={newSessionDesign()}>
           <Show when={isDesktop() ? desktopV2PanelLayout().visible : terminalOpen()}>
-            <div class="min-w-0 h-full flex flex-1 flex-col">
+            <div data-world-inspector class="min-w-0 h-full flex flex-1 flex-col">
               <Show when={isDesktop() && (desktopV2ReviewOpen() || desktopFileTreeOpen())}>
                 <div class="min-h-0 flex-1">
                   <Suspense>

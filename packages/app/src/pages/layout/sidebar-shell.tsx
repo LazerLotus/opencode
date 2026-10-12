@@ -14,6 +14,7 @@ import { type LocalProject } from "@/context/layout"
 
 export const SidebarContent = (props: {
   mobile?: boolean
+  end?: boolean
   opened: Accessor<boolean>
   aimMove: (event: MouseEvent) => void
   projects: Accessor<LocalProject[]>
@@ -47,7 +48,7 @@ export const SidebarContent = (props: {
   })
 
   return (
-    <div class="flex h-full w-full min-w-0 overflow-hidden">
+    <div class="flex h-full w-full min-w-0 overflow-hidden" classList={{ "flex-row-reverse": props.end }}>
       <div
         data-component="sidebar-rail"
         class="w-16 shrink-0 bg-background-base flex flex-col items-center overflow-hidden"

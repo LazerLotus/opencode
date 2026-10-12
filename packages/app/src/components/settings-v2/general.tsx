@@ -9,6 +9,7 @@ import { useLanguage } from "@/context/language"
 import { usePlatform } from "@/context/platform"
 import { useUpdaterAction } from "../updater-action"
 import { useSettings } from "@/context/settings"
+import { worldDesigns, resolveWorldDesign } from "../world-design"
 import { ExternalLink } from "../external-link"
 import { SettingsListV2 } from "./parts/list"
 import { SettingsRowV2 } from "./parts/row"
@@ -121,10 +122,27 @@ const ShellSetting: Component<{ controller: ShellSettingsController }> = (props)
 
 const AppearanceSection: Component<{ controller: AppearanceSettingsController }> = (props) => {
   const language = useLanguage()
+  const settings = useSettings()
   return (
     <div class="settings-v2-section">
       <h3 class="settings-v2-section-title">{language.t("settings.general.section.appearance")}</h3>
       <SettingsListV2>
+        <SettingsRowV2
+          title={language.t("settings.general.row.design.title")}
+          description={language.t("settings.general.row.design.description")}
+        >
+          <SelectV2
+            appearance="inline"
+            data-action="settings-design"
+            options={[...worldDesigns]}
+            current={resolveWorldDesign(settings.appearance.design())}
+            placement="bottom-end"
+            gutter={6}
+            value={(option) => option.id}
+            label={(option) => option.name}
+            onSelect={(option) => option && settings.appearance.setDesign(option.id)}
+          />
+        </SettingsRowV2>
         <SettingsRowV2
           title={language.t("settings.general.row.colorScheme.title")}
           description={language.t("settings.general.row.colorScheme.description")}

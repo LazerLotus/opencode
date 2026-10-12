@@ -31,6 +31,7 @@ import { decode64 } from "@/utils/base64"
 import { playSoundById, SOUND_OPTIONS } from "@/utils/sound"
 import { ExternalLink } from "./external-link"
 import { SettingsList } from "./settings-list"
+import { worldDesigns, resolveWorldDesign } from "./world-design"
 
 let demoSoundState = {
   cleanup: undefined as (() => void) | undefined,
@@ -459,6 +460,22 @@ export const SettingsGeneral: Component = () => {
       <h3 class="text-14-medium text-text-strong pb-2">{language.t("settings.general.section.appearance")}</h3>
 
       <SettingsList>
+        <SettingsRow
+          title={language.t("settings.general.row.design.title")}
+          description={language.t("settings.general.row.design.description")}
+        >
+          <Select
+            data-action="settings-design"
+            options={[...worldDesigns]}
+            current={resolveWorldDesign(settings.appearance.design())}
+            value={(option) => option.id}
+            label={(option) => option.name}
+            onSelect={(option) => option && settings.appearance.setDesign(option.id)}
+            variant="secondary"
+            size="small"
+            triggerVariant="settings"
+          />
+        </SettingsRow>
         <SettingsRow
           title={language.t("settings.general.row.colorScheme.title")}
           description={language.t("settings.general.row.colorScheme.description")}

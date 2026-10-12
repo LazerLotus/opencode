@@ -1,0 +1,710 @@
+/* Composition is independent of the working surface's chosen color theme. */
+.world-shell {
+  --world-blue: #155ef2;
+  --world-yellow: #ffc100;
+  --world-green: #a0f9b1;
+  --world-radius: 18px;
+}
+.world-header {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 140px minmax(220px, 1.6fr) minmax(180px, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+  min-height: 150px;
+  padding: 22px 28px;
+  overflow: hidden;
+  background: var(--world-blue);
+  color: #fff;
+  flex-shrink: 0;
+  border-bottom: 3px solid var(--world-yellow);
+}
+.world-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+.world-brand img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+.world-brand-caption {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #dbe7ff;
+}
+.world-heading {
+  min-width: 0;
+  z-index: 1;
+}
+.world-kicker {
+  display: block;
+  color: var(--world-green);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.world-heading h1 {
+  margin: 0;
+  max-width: 600px;
+  font-size: clamp(22px, 2.8vw, 40px);
+  line-height: 1.08;
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.world-art {
+  display: block;
+  width: 100%;
+  height: 115px;
+  color: #c8dcff;
+  overflow: visible;
+}
+.world-art-yellow {
+  fill: var(--world-yellow);
+}
+.world-art-green {
+  fill: var(--world-green);
+}
+.world-design-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  z-index: 1;
+}
+.world-design-picker select {
+  appearance: auto;
+  cursor: pointer;
+  min-width: 136px;
+  max-width: 100%;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: #fff;
+  background: #1249b7;
+  border: 1px solid #89b0ff;
+  border-radius: 6px;
+}
+.world-design-picker option {
+  color: #fff;
+  background: #1249b7;
+}
+.world-design-picker select:focus-visible {
+  outline: 3px solid var(--world-yellow);
+  outline-offset: 3px;
+}
+.world-workspace {
+  background: var(--background-base);
+  color: var(--text-base);
+}
+.world-main {
+  min-width: 0;
+}
+.world-shell .world-surface {
+  background: var(--background-base);
+  color: var(--text-base);
+  border-radius: var(--world-radius);
+  border: 1px solid var(--border-base);
+  overflow: hidden;
+}
+.world-shell [data-world-panels] {
+  gap: var(--world-gap);
+}
+.world-shell [data-world-conversation],
+.world-shell [data-world-inspector] {
+  min-width: 0;
+}
+.world-shell [data-world-inspector] {
+  border-left: 1px solid var(--border-base);
+  background: var(--background-base);
+}
+.world-shell [data-component="sidebar-nav-desktop"] {
+  background: var(--background-base);
+}
+
+/* Orbital instrument deck. */
+.world-shell[data-world="kinetic"] {
+  --world-radius: 8px;
+}
+[data-world="kinetic"] .world-header {
+  background-image:
+    linear-gradient(90deg, transparent 49.7%, #ffffff0d 50%, transparent 50.3%),
+    linear-gradient(#ffffff0a 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+[data-world="kinetic"] .world-brand {
+  align-self: start;
+}
+[data-world="kinetic"] .world-heading h1 {
+  font-weight: 750;
+  text-transform: uppercase;
+}
+[data-world="kinetic"] .world-surface {
+  border-top-width: 4px;
+}
+[data-world="kinetic"] [data-world-inspector] {
+  border-left-style: dashed;
+}
+[data-world="kinetic"] [data-component="sidebar-rail"] {
+  border-right: 1px dashed var(--border-base);
+}
+
+/* Botanical curves and independent garden panels. */
+.world-shell[data-world="symbiont"] {
+  --world-radius: 30px 30px 12px 30px;
+}
+[data-world="symbiont"] .world-header {
+  min-height: 174px;
+  border-radius: 0 0 40px 0;
+  border-bottom: 0;
+  background-image: radial-gradient(ellipse at 80% 150%, #a0f9b144 0, transparent 65%);
+}
+[data-world="symbiont"] .world-heading h1 {
+  font-weight: 500;
+}
+[data-world="symbiont"] .world-art {
+  height: 140px;
+}
+[data-world="symbiont"] [data-world-inspector] {
+  border-radius: 26px 0 0 26px;
+  border: 1px solid var(--border-base);
+}
+[data-world="symbiont"] [data-component="sidebar-nav-desktop"] {
+  border-radius: 0 24px 0 0;
+}
+[data-world="symbiont"] [data-component="sidebar-rail"] {
+  border-radius: 24px;
+  margin-block: 12px;
+  background: var(--background-weak);
+}
+
+/* Converging horizons and a panoramic workspace. */
+.world-shell[data-world="parallax"] {
+  --world-radius: 4px;
+}
+[data-world="parallax"] .world-header {
+  min-height: 168px;
+  border-bottom-width: 1px;
+  background: linear-gradient(112deg, #155ef2 60%, #114cbd 60%);
+}
+[data-world="parallax"] .world-heading {
+  border-left: 3px solid var(--world-yellow);
+  padding-left: 20px;
+}
+[data-world="parallax"] .world-art {
+  height: 140px;
+}
+[data-world="parallax"] .world-surface {
+  border-top: 4px solid var(--border-base);
+}
+[data-world="parallax"] [data-world-inspector] {
+  border-left-width: 3px;
+}
+
+/* Horizontal musical score and a low conductor's desk. */
+.world-shell[data-world="chorus"] {
+  --world-radius: 0;
+  --world-gap: 0;
+}
+[data-world="chorus"] .world-header {
+  min-height: 126px;
+  background-image: repeating-linear-gradient(0deg, transparent 0 23px, #ffffff16 23px 24px);
+  border-bottom-width: 5px;
+}
+[data-world="chorus"] .world-heading h1 {
+  font-size: clamp(22px, 2.5vw, 36px);
+  font-weight: 800;
+}
+[data-world="chorus"] .world-kicker {
+  background: var(--world-blue);
+  display: inline-block;
+  padding: 3px 0;
+}
+[data-world="chorus"] .world-surface {
+  border-top: 0;
+  border-bottom: 0;
+}
+[data-world="chorus"] [data-world-inspector] {
+  border-left-width: 2px;
+}
+[data-world="chorus"] [data-component="sidebar-rail"] {
+  border-right: 3px double var(--border-base);
+}
+
+/* Layered cortex membranes and a connected working surface. */
+.world-shell[data-world="broodmind"] {
+  --world-radius: 36px 12px 36px 12px;
+}
+[data-world="broodmind"] .world-header {
+  min-height: 184px;
+  border-bottom: 0;
+  border-radius: 0 0 46px 46px;
+  background-image:
+    radial-gradient(ellipse at 48% 170%, #a0f9b133 0 45%, transparent 45.4%),
+    radial-gradient(ellipse at 48% 170%, transparent 0 64%, #ffffff20 64.4% 65%, transparent 65.4%);
+}
+[data-world="broodmind"] .world-heading h1 {
+  font-weight: 500;
+  letter-spacing: -0.055em;
+}
+[data-world="broodmind"] .world-art {
+  height: 142px;
+}
+[data-world="broodmind"] [data-world-inspector] {
+  border-radius: 30px 0 0 14px;
+  border: 1px solid var(--border-base);
+}
+[data-world="broodmind"] [data-component="sidebar-rail"] {
+  border-radius: 0 24px 24px 0;
+  background: var(--background-weak);
+}
+
+/* Pixel lattice and stepped construction frames. */
+.world-shell[data-world="quanta"] {
+  --world-radius: 0;
+}
+[data-world="quanta"] .world-header {
+  min-height: 158px;
+  border-bottom: 8px solid var(--world-yellow);
+  background-image: radial-gradient(#ffffff38 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+[data-world="quanta"] .world-heading h1 {
+  font-family: "JetBrainsMono Nerd Font Mono", monospace;
+  font-size: clamp(20px, 2.3vw, 32px);
+  letter-spacing: -0.07em;
+}
+[data-world="quanta"] .world-kicker,
+[data-world="quanta"] .world-design-picker {
+  font-family: monospace;
+}
+[data-world="quanta"] .world-design-picker select {
+  border-radius: 0;
+  border-width: 2px;
+}
+[data-world="quanta"] .world-surface {
+  border-width: 2px;
+  box-shadow: 5px 5px 0 var(--border-base);
+}
+[data-world="quanta"] [data-world-inspector] {
+  border-left: 2px dashed var(--border-base);
+}
+[data-world="quanta"] [data-component="sidebar-rail"] {
+  border: 2px solid var(--border-base);
+  border-left: 0;
+}
+
+/* A tactical journal's strong edges frame the coding tools. */
+.world-shell[data-world="raidweaver"] {
+  --world-radius: 3px;
+}
+[data-world="raidweaver"] .world-header {
+  min-height: 166px;
+  border-bottom-width: 4px;
+  background-image:
+    linear-gradient(135deg, #ffffff12 25%, transparent 25%), linear-gradient(315deg, #ffffff12 25%, transparent 25%);
+  background-size: 120px 120px;
+}
+[data-world="raidweaver"] .world-heading h1 {
+  font-family: Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+[data-world="raidweaver"] .world-brand {
+  padding: 10px;
+  border: 1px solid #ffffff55;
+}
+[data-world="raidweaver"] .world-surface {
+  border: 3px double var(--border-base);
+}
+[data-world="raidweaver"] [data-world-inspector] {
+  border-left: 3px double var(--border-base);
+}
+[data-world="raidweaver"] [data-component="sidebar-rail"] {
+  border-right: 3px double var(--border-base);
+}
+
+/* Radar linework and watch station labels. */
+.world-shell[data-world="nightwatch"] {
+  --world-radius: 12px;
+}
+[data-world="nightwatch"] .world-header {
+  min-height: 162px;
+  background-image: repeating-linear-gradient(0deg, #ffffff05 0 1px, transparent 1px 4px);
+  border-bottom: 1px solid var(--world-green);
+}
+[data-world="nightwatch"] .world-heading h1 {
+  font-size: clamp(22px, 2.6vw, 36px);
+  font-weight: 500;
+}
+[data-world="nightwatch"] .world-kicker {
+  font-family: monospace;
+  letter-spacing: 0.18em;
+}
+[data-world="nightwatch"] .world-art {
+  height: 132px;
+}
+[data-world="nightwatch"] .world-design-picker {
+  border-left: 1px solid #ffffff55;
+  padding-left: 20px;
+}
+[data-world="nightwatch"] .world-surface {
+  border-radius: 12px 0 0 12px;
+}
+[data-world="nightwatch"] [data-world-inspector] {
+  border-left-style: dashed;
+}
+[data-world="nightwatch"] [data-component="sidebar-rail"] {
+  border-left: 1px dashed var(--border-base);
+}
+
+/* Editorial ledger rules and a generous serif opening. */
+.world-shell[data-world="commonplace"] {
+  --world-radius: 0;
+}
+[data-world="commonplace"] .world-header {
+  min-height: 178px;
+  border-bottom: 6px double var(--world-yellow);
+}
+[data-world="commonplace"] .world-heading h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: clamp(24px, 3vw, 44px);
+  letter-spacing: -0.03em;
+}
+[data-world="commonplace"] .world-brand {
+  border-right: 1px solid #ffffff60;
+  padding-right: 20px;
+}
+[data-world="commonplace"] .world-surface {
+  border-left: 0;
+  border-right: 0;
+  border-top: 3px double var(--border-base);
+}
+[data-world="commonplace"] [data-world-inspector] {
+  border-left: 3px double var(--border-base);
+}
+[data-world="commonplace"] [data-component="sidebar-rail"] {
+  border-right: 1px solid var(--border-base);
+}
+
+/* Industrial lanes and squared junctions. */
+.world-shell[data-world="switchyard"] {
+  --world-radius: 0;
+}
+[data-world="switchyard"] .world-header {
+  min-height: 132px;
+  padding-block: 16px;
+  border-bottom: 7px solid var(--world-yellow);
+  background-image: linear-gradient(90deg, transparent 0 80%, #ffffff12 80% 81%, transparent 81%);
+  background-size: 90px 100%;
+}
+[data-world="switchyard"] .world-heading h1 {
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(22px, 2.5vw, 35px);
+}
+[data-world="switchyard"] .world-brand {
+  align-self: stretch;
+  border-right: 2px solid #ffffff55;
+  padding-right: 12px;
+}
+[data-world="switchyard"] .world-design-picker select {
+  border-radius: 0;
+}
+[data-world="switchyard"] .world-surface {
+  border-top-width: 5px;
+}
+[data-world="switchyard"] [data-world-inspector] {
+  border-left-width: 5px;
+}
+[data-world="switchyard"] [data-component="sidebar-rail"] {
+  border-right: 4px solid var(--border-base);
+  background: var(--background-weak);
+}
+
+/* Soft islands and room between working panels. */
+.world-shell[data-world="orchard"] {
+  --world-radius: 32px;
+}
+[data-world="orchard"] .world-header {
+  min-height: 184px;
+  border-radius: 0 0 44px 44px;
+  border-bottom: 0;
+  background-image:
+    radial-gradient(ellipse at 15% 130%, #ffffff15 0 35%, transparent 35.5%),
+    radial-gradient(ellipse at 80% 150%, #a0f9b12b 0 45%, transparent 45.5%);
+}
+[data-world="orchard"] .world-heading h1 {
+  font-weight: 500;
+  font-size: clamp(24px, 2.8vw, 40px);
+}
+[data-world="orchard"] .world-art {
+  height: 145px;
+}
+[data-world="orchard"] .world-design-picker select {
+  border-radius: 20px;
+}
+[data-world="orchard"] [data-world-inspector] {
+  border: 1px solid var(--border-base);
+  border-radius: 28px 0 0 28px;
+}
+[data-world="orchard"] .world-surface {
+  box-shadow: 0 6px 16px #00000008;
+}
+[data-world="orchard"] [data-component="sidebar-rail"] {
+  border-radius: 24px;
+  margin-block: 12px;
+  background: var(--background-weak);
+}
+
+@media (max-width: 1100px) {
+  .world-header[data-design] {
+    grid-template-columns: 120px minmax(180px, 1fr) auto;
+    gap: 18px;
+    padding-inline: 20px;
+    min-height: 140px;
+  }
+  .world-art {
+    position: absolute;
+    width: 240px;
+    height: 140px !important;
+    right: 140px;
+    opacity: 0.22;
+    z-index: -1;
+  }
+  .world-heading h1 {
+    font-size: 28px;
+  }
+}
+@media (max-width: 767px) {
+  .world-header[data-design] {
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 98px;
+    padding: 12px 16px;
+    border-radius: 0;
+    border-bottom-width: 2px;
+  }
+  .world-brand {
+    display: flex;
+  }
+  .world-brand > span {
+    display: none;
+  }
+  .world-brand img {
+    width: 24px;
+    height: 24px;
+  }
+  .world-header .world-brand {
+    padding: 0;
+    border: 0;
+    align-self: center;
+  }
+  .world-heading h1 {
+    font-size: 20px !important;
+    line-height: 1.15;
+  }
+  .world-kicker {
+    font-size: 9px;
+    margin-bottom: 5px;
+    letter-spacing: 0.08em;
+  }
+  .world-design-picker {
+    padding-left: 0 !important;
+    border-left: 0 !important;
+    font-size: 9px;
+    gap: 4px;
+  }
+  .world-design-picker select {
+    min-width: 108px;
+    max-width: 130px;
+    padding: 7px 6px;
+    font-size: 11px;
+  }
+  .world-art {
+    right: 70px;
+    width: 190px;
+    height: 100px !important;
+    opacity: 0.14;
+  }
+  .world-shell[data-world] {
+    --world-radius: 0;
+  }
+  .world-shell [data-world-panels] {
+    gap: 0;
+  }
+  .world-surface {
+    border-left: 0 !important;
+    border-right: 0 !important;
+    box-shadow: none !important;
+  }
+  [data-world="parallax"] .world-heading {
+    border: 0;
+    padding: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .world-header *,
+  .world-surface {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* The same conversation and inspector become different kinds of desks. */
+@media (min-width: 768px) {
+  [data-world="symbiont"] [data-world-conversation],
+  [data-world="orchard"] [data-world-conversation] {
+    border: 1px solid var(--border-base);
+    border-radius: 24px;
+    background: var(--background-base);
+    overflow: hidden;
+  }
+  [data-world="broodmind"] [data-world-conversation] {
+    border: 1px solid var(--border-base);
+    border-radius: 30px 10px 30px 10px;
+    overflow: hidden;
+  }
+  [data-world="kinetic"] [data-world-conversation] {
+    border-top: 3px solid var(--border-base);
+    border-radius: 6px 6px 0 0;
+  }
+  [data-world="chorus"] [data-world-conversation] {
+    border-top: 3px double var(--border-base);
+    border-bottom: 3px double var(--border-base);
+  }
+  [data-world="quanta"] [data-world-conversation] {
+    border: 2px solid var(--border-base);
+    box-shadow: 4px 4px 0 var(--border-base);
+  }
+  [data-world="raidweaver"] [data-world-conversation] {
+    border: 3px double var(--border-base);
+  }
+  [data-world="commonplace"] [data-world-conversation] {
+    border-top: 1px solid var(--border-base);
+    border-bottom: 1px solid var(--border-base);
+  }
+  [data-world="switchyard"] [data-world-conversation] {
+    border-top: 5px solid var(--border-base);
+    border-bottom: 5px solid var(--border-base);
+  }
+  [data-world="nightwatch"] [data-world-conversation] {
+    border: 1px dashed var(--border-base);
+    border-radius: 10px;
+  }
+  [data-world="parallax"] [data-world-conversation] {
+    border-block: 2px solid var(--border-base);
+  }
+}
+
+/* The current interface keeps its mounted home/session controls inside each composition. */
+@media (min-width: 1100px) {
+  [data-world="quanta"] .world-body,
+  [data-world="raidweaver"] .world-body {
+    flex-direction: row;
+    gap: 12px;
+    padding: 12px;
+  }
+  [data-world="raidweaver"] .world-body {
+    flex-direction: row-reverse;
+  }
+  [data-world="quanta"] .world-body > .world-header,
+  [data-world="raidweaver"] .world-body > .world-header {
+    width: 232px;
+    min-width: 232px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(140px, 1fr) auto;
+    align-content: start;
+    gap: 28px;
+    padding: 24px;
+    border-bottom: 0;
+    border-inline-end: 5px solid var(--world-yellow);
+  }
+  [data-world="raidweaver"] .world-body > .world-header {
+    border: 4px double var(--world-yellow);
+  }
+  [data-world="quanta"] .world-body .world-heading h1,
+  [data-world="raidweaver"] .world-body .world-heading h1 {
+    font-size: 34px;
+  }
+  [data-world="quanta"] .world-body .world-art,
+  [data-world="raidweaver"] .world-body .world-art {
+    height: 210px;
+    align-self: center;
+  }
+  [data-world="chorus"] .world-body {
+    flex-direction: column-reverse;
+  }
+  [data-world="chorus"] .world-body > .world-header {
+    min-height: 108px;
+    padding-block: 12px;
+    border-top: 4px solid var(--world-yellow);
+    border-bottom: 0;
+  }
+  [data-world="chorus"] .world-body .world-art {
+    height: 78px;
+  }
+  [data-world="commonplace"] [data-world-home] {
+    max-width: 1240px;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 48px;
+  }
+  [data-world="commonplace"] [data-world-home] > section {
+    border-inline-start: 1px solid var(--border-base);
+    padding-inline-start: 28px;
+  }
+  [data-world="parallax"] [data-world-home],
+  [data-world="broodmind"] [data-world-home],
+  [data-world="nightwatch"] [data-world-home] {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+  [data-world="parallax"] [data-world-home] > aside,
+  [data-world="broodmind"] [data-world-home] > aside,
+  [data-world="nightwatch"] [data-world-home] > aside {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  [data-world="parallax"] [data-world-home] > section,
+  [data-world="broodmind"] [data-world-home] > section,
+  [data-world="nightwatch"] [data-world-home] > section {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  [data-world="symbiont"] [data-world-home],
+  [data-world="orchard"] [data-world-home] {
+    max-width: 1320px;
+    gap: 40px;
+    padding-inline: 32px;
+  }
+  [data-world="orchard"] [data-world-home] > aside {
+    border: 1px solid var(--border-base);
+    border-radius: 32px;
+    padding: 24px 16px;
+    background: var(--background-weak);
+  }
+  [data-world="switchyard"] [data-world-home] {
+    max-width: none;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 16px;
+  }
+  [data-world="switchyard"] [data-world-home] > aside {
+    border-inline-end: 3px solid var(--border-base);
+    padding-inline-end: 16px;
+  }
+}

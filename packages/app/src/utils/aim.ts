@@ -5,6 +5,7 @@ export function createAim(props: {
   active: () => string | undefined
   el: () => HTMLElement | undefined
   onActivate: (id: string) => void
+  direction?: () => "left" | "right"
   delay?: number
   max?: number
   tolerance?: number
@@ -59,20 +60,26 @@ export function createAim(props: {
     if (state.locs.length < 2) return 0
 
     const rect = el.getBoundingClientRect()
-    const loc = state.locs[state.locs.length - 1]
-    if (!loc) return 0
+    const latest = state.locs[state.locs.length - 1]
+    if (!latest) return 0
 
-    const prev = state.locs[0] ?? loc
-    if (prev.x < rect.left || prev.x > rect.right || prev.y < rect.top || prev.y > rect.bottom) return 0
-    if (state.last && loc.x === state.last.x && loc.y === state.last.y) return 0
+    const first = state.locs[0] ?? latest
+    if (first.x < rect.left || first.x > rect.right || first.y < rect.top || first.y > rect.bottom) return 0
+    if (state.last && latest.x === state.last.x && latest.y === state.last.y) return 0
 
-    if (rect.right - loc.x <= edge) {
-      state.last = loc
+    // Mirror horizontal coordinates so the same aiming triangle works from either rail.
+    const mirror = props.direction?.() === "left"
+    const loc = { x: mirror ? -latest.x : latest.x, y: latest.y }
+    const prev = { x: mirror ? -first.x : first.x, y: first.y }
+    const boundary = mirror ? -rect.left : rect.right
+
+    if (boundary - loc.x <= edge) {
+      state.last = latest
       return delay
     }
 
-    const upper = { x: rect.right, y: rect.top - tolerance }
-    const lower = { x: rect.right, y: rect.bottom + tolerance }
+    const upper = { x: boundary, y: rect.top - tolerance }
+    const lower = { x: boundary, y: rect.bottom + tolerance }
     const slope = (a: Point, b: Point) => (b.y - a.y) / (b.x - a.x)
 
     const decreasing = slope(loc, upper)
@@ -81,7 +88,7 @@ export function createAim(props: {
     const prevIncreasing = slope(prev, lower)
 
     if (decreasing < prevDecreasing && increasing > prevIncreasing) {
-      state.last = loc
+      state.last = latest
       return delay
     }
 

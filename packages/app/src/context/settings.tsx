@@ -3,6 +3,7 @@ import { batch, createEffect, createMemo, createSignal, onCleanup } from "solid-
 import { createSimpleContext } from "@opencode-ai/ui/context"
 import { persisted } from "@/utils/persist"
 import { usePlatform } from "@/context/platform"
+import { resolveWorldDesign, type WorldDesign } from "@/components/world-design"
 
 export interface NotificationSettings {
   agent: boolean
@@ -41,6 +42,7 @@ export interface Settings {
     shouldDisplayTabsToast?: boolean
   }
   appearance: {
+    design?: WorldDesign
     fontSize: number
     mono: string
     sans: string
@@ -459,6 +461,10 @@ export const { use: useSettings, provider: SettingsProvider } = createSimpleCont
         customAgents: visible(showCustomAgents),
       },
       appearance: {
+        design: createMemo(() => resolveWorldDesign(store.appearance?.design).id),
+        setDesign(value: WorldDesign) {
+          setStore("appearance", "design", resolveWorldDesign(value).id)
+        },
         fontSize: withFallback(() => store.appearance?.fontSize, defaultSettings.appearance.fontSize),
         setFontSize(value: number) {
           setStore("appearance", "fontSize", value)

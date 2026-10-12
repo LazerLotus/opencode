@@ -1,3 +1,5 @@
+import { WorldHeader } from "@/components/world-header"
+import { resolveWorldDesign } from "@/components/world-design"
 import {
   createEffect,
   createMemo,
@@ -112,6 +114,8 @@ export default function LegacyLayout(props: ParentProps) {
   const platform = usePlatform()
   const pickDirectory = useDirectoryPicker()
   const settings = useSettings()
+  const world = createMemo(() => resolveWorldDesign(settings.appearance.design()))
+  const navigationEnd = createMemo(() => world().navigation === "end")
   const server = useServer()
   const notification = useNotification()
   const permission = usePermission()
@@ -199,6 +203,7 @@ export default function LegacyLayout(props: ParentProps) {
 
   const aim = createAim({
     enabled: () => !layout.sidebar.opened(),
+    direction: () => (navigationEnd() !== (language.direction() === "rtl") ? "left" : "right"),
     active: () => state.hoverProject,
     el: () => state.nav?.querySelector<HTMLElement>("[data-component='sidebar-rail']") ?? state.nav,
     onActivate: (directory) => {
@@ -2220,6 +2225,7 @@ export default function LegacyLayout(props: ParentProps) {
   const projectOverlay = () => <ProjectDragOverlay projects={projects} activeProject={() => store.activeProject} />
   const sidebarContent = (mobile?: boolean) => (
     <SidebarContent
+      end={!mobile && navigationEnd()}
       mobile={mobile}
       opened={() => layout.sidebar.opened()}
       aimMove={aim.move}
@@ -2246,7 +2252,11 @@ export default function LegacyLayout(props: ParentProps) {
   )
 
   return (
-    <div class="relative bg-background-base flex-1 min-h-0 min-w-0 flex flex-col select-none [&_input]:select-text [&_textarea]:select-text [&_[contenteditable]]:select-text">
+    <div
+      data-world={world().id}
+      style={{ "--world-gap": `${world().gap}px` }}
+      class="world-shell relative bg-background-base flex-1 min-h-0 min-w-0 flex flex-col select-none [&_input]:select-text [&_textarea]:select-text [&_[contenteditable]]:select-text"
+    >
       {autoselecting() ?? ""}
       <Titlebar
         update={titlebarUpdate}
@@ -2256,18 +2266,21 @@ export default function LegacyLayout(props: ParentProps) {
             : undefined
         }
       />
+      <WorldHeader />
       <Show when={updateVersion() !== undefined}>
         <UpdateAvailableToast version={updateVersion() ?? ""} install={installUpdate} language={language} />
       </Show>
       <div class="flex-1 min-h-0 min-w-0 flex">
         <div class="flex-1 min-h-0 relative">
-          <div class="size-full relative overflow-x-hidden">
+          <div class="world-workspace size-full relative overflow-x-hidden">
             <nav
               aria-label={language.t("sidebar.nav.projectsAndSessions")}
               data-component="sidebar-nav-desktop"
               classList={{
                 "hidden xl:block": true,
-                "absolute inset-y-0 start-0": true,
+                "absolute inset-y-0": true,
+                "start-0": !navigationEnd(),
+                "end-0": navigationEnd(),
                 "z-10": true,
               }}
               style={{ width: `${side()}px` }}
@@ -2290,11 +2303,15 @@ export default function LegacyLayout(props: ParentProps) {
             <Show when={layout.sidebar.opened()}>
               <div
                 class="hidden xl:block absolute inset-y-0 z-30 w-0 overflow-visible"
-                style={{ "inset-inline-start": `${side()}px` }}
+                style={{
+                  "inset-inline-start": navigationEnd() ? undefined : `${side()}px`,
+                  "inset-inline-end": navigationEnd() ? `${side()}px` : undefined,
+                }}
                 onPointerDown={() => setState("sizing", true)}
               >
                 <ResizeHandle
                   direction="horizontal"
+                  edge={navigationEnd() ? "start" : "end"}
                   size={layout.sidebar.width()}
                   min={244}
                   max={typeof window === "undefined" ? 1000 : window.innerWidth * 0.3 + 64}
@@ -2340,8 +2357,10 @@ export default function LegacyLayout(props: ParentProps) {
 
             <div
               classList={{
-                "absolute inset-0": true,
-                "xl:inset-y-0 xl:end-0 xl:start-[var(--main-left)]": true,
+                "world-main absolute inset-0": true,
+                "xl:inset-y-0": true,
+                "xl:end-0 xl:start-[var(--main-left)]": !navigationEnd(),
+                "xl:start-0 xl:end-[var(--main-left)]": navigationEnd(),
                 "z-20": true,
                 "transition-[inset-inline-start] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[inset-inline-start] motion-reduce:transition-none":
                   !state.sizing,
@@ -2352,7 +2371,7 @@ export default function LegacyLayout(props: ParentProps) {
             >
               <main
                 classList={{
-                  "size-full overflow-x-hidden flex flex-col items-start contain-strict border-t border-border-weak-base bg-background-base xl:border-s xl:rounded-ss-[12px]": true,
+                  "world-surface size-full overflow-x-hidden flex flex-col items-start contain-strict border-t border-border-weak-base bg-background-base xl:border-s xl:rounded-ss-[12px]": true,
                 }}
               >
                 <Show when={!autoselecting.loading} fallback={<div class="size-full" />}>
@@ -2363,7 +2382,9 @@ export default function LegacyLayout(props: ParentProps) {
 
             <div
               classList={{
-                "hidden xl:flex absolute inset-y-0 start-16 z-30": true,
+                "hidden xl:flex absolute inset-y-0 z-30": true,
+                "start-16": !navigationEnd(),
+                "end-16": navigationEnd(),
                 "opacity-100 translate-x-0 pointer-events-auto": state.peeked && !layout.sidebar.opened(),
                 "opacity-0 ltr:-translate-x-2 rtl:translate-x-2 pointer-events-none":
                   !state.peeked || layout.sidebar.opened(),
@@ -2395,7 +2416,10 @@ export default function LegacyLayout(props: ParentProps) {
                 "duration-180 ease-out": state.peeked && !layout.sidebar.opened(),
                 "duration-120 ease-in": !state.peeked || layout.sidebar.opened(),
               }}
-              style={{ "inset-inline-start": `calc(4rem + ${panel()}px)` }}
+              style={{
+                "inset-inline-start": navigationEnd() ? "0" : `calc(4rem + ${panel()}px)`,
+                "inset-inline-end": navigationEnd() ? `calc(4rem + ${panel()}px)` : "0",
+              }}
             >
               <div class="h-full w-px" style={{ "box-shadow": "var(--shadow-sidebar-overlay)" }} />
             </div>

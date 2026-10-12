@@ -94,8 +94,19 @@ export function serveDemo(request: IncomingMessage, response: ServerResponse) {
   if (path === "/api/vcs") return json({ location, data: { branch: "demo-welcome-card", defaultBranch: "dev" } })
   if (path === "/api/project") return json([demo.project])
   if (path === "/api/project/current") return json({ id: demo.project.id, directory: demo.directory })
-  if (path.startsWith("/api/") && !path.startsWith("/api/session"))
-    return json({ error: "Demo endpoint not found" }, 404)
+  if (path === "/session" || path === "/api/session") {
+    const search = url.searchParams.get("search")?.toLowerCase()
+    const sessions = demo.sessions.filter((session) => !search || session.title.toLowerCase().includes(search))
+    if (path === "/session") return json(sessions)
+    const offset = Math.max(0, Number(url.searchParams.get("cursor")) || 0)
+    const limit = Math.max(1, Number(url.searchParams.get("limit")) || 50)
+    return json({
+      data: sessions.slice(offset, offset + limit).map(currentSession),
+      cursor: { next: offset + limit < sessions.length ? String(offset + limit) : undefined },
+    })
+  }
+  if (path === "/api/session/active") return json({ data: {} })
+  if (path.startsWith("/api/")) return json({ error: "Demo endpoint not found" }, 404)
   if (path === "/path")
     return json({
       state: demo.directory,
@@ -128,18 +139,6 @@ export function serveDemo(request: IncomingMessage, response: ServerResponse) {
   if (path === "/experimental/capabilities") return json({ backgroundSubagents: false })
   if (emptyList.has(path)) return json([])
   if (emptyObject.has(path)) return json({})
-  if (path === "/session" || path === "/api/session") {
-    const search = url.searchParams.get("search")?.toLowerCase()
-    const sessions = demo.sessions.filter((session) => !search || session.title.toLowerCase().includes(search))
-    if (path === "/session") return json(sessions)
-    const offset = Math.max(0, Number(url.searchParams.get("cursor")) || 0)
-    const limit = Math.max(1, Number(url.searchParams.get("limit")) || 50)
-    return json({
-      data: sessions.slice(offset, offset + limit).map(currentSession),
-      cursor: { next: offset + limit < sessions.length ? String(offset + limit) : undefined },
-    })
-  }
-  if (path === "/api/session/active") return json({ data: {} })
   if (path === "/file") return json(demoFileList(url.searchParams.get("path") ?? ""))
   if (path === "/file/content") {
     const file = (url.searchParams.get("path") ?? "").replace(`${demo.directory}/`, "")
@@ -156,29 +155,26 @@ export function serveDemo(request: IncomingMessage, response: ServerResponse) {
         .slice(0, Math.max(1, Number(url.searchParams.get("limit")) || 100)),
     )
   }
-  const match = path.match(/^\/(api\/)?session\/([^/]+)(?:\/(message|todo|diff|children)(?:\/([^/]+))?)?$/)
+  const match = path.match(/^\/session\/([^/]+)(?:\/(message|todo|diff|children)(?:\/([^/]+))?)?$/)
   if (!match) return json({ error: "Demo endpoint not found" }, 404)
-  const session = demo.sessions.find((item) => item.id === match[2])
+  const session = demo.sessions.find((item) => item.id === match[1])
   if (!session) return json({ error: "Demo session not found" }, 404)
-  if (!match[3]) return json(match[1] ? { data: currentSession(session) } : session)
-  if (match[3] === "todo") return json(session.id === demo.sessionID ? demo.todos : [])
-  if (match[3] === "diff") return json(session.id === demo.sessionID ? demo.diffs : [])
-  if (match[3] === "children") return json([])
+  if (!match[2]) return json(session)
+  if (match[2] === "todo") return json(session.id === demo.sessionID ? demo.todos : [])
+  if (match[2] === "diff") return json(session.id === demo.sessionID ? demo.diffs : [])
+  if (match[2] === "children") return json([])
   const messages = demo.messages[session.id] ?? []
-  if (match[4]) {
-    const message = messages.find((item) => item.info.id === match[4])
-    return message
-      ? json(match[1] ? { data: currentMessage(message) } : message)
-      : json({ error: "Demo message not found" }, 404)
+  if (match[3]) {
+    const message = messages.find((item) => item.info.id === match[3])
+    return message ? json(message) : json({ error: "Demo message not found" }, 404)
   }
   const limit = Math.max(1, Number(url.searchParams.get("limit")) || 80)
-  const cursor = url.searchParams.get(match[1] ? "cursor" : "before")
+  const cursor = url.searchParams.get("before")
   const end = cursor ? messages.findIndex((message) => message.info.id === cursor) : messages.length
   if (end < 0) return json({ error: "Invalid demo message cursor" }, 400)
   const start = Math.max(0, end - limit)
   const next = start > 0 ? messages[start].info.id : undefined
   const items = messages.slice(start, end)
-  if (match[1]) return json({ data: items.map(currentMessage).reverse(), cursor: { next } })
   if (next) response.setHeader("x-next-cursor", next)
   return json(items)
 }
@@ -194,57 +190,5 @@ function currentSession(session: (typeof demo.sessions)[number]) {
     cost: 0,
     tokens: { input: 2400, output: 1100, reasoning: 300, cache: { read: 800, write: 0 } },
     location: { directory: demo.directory, project: { id: demo.project.id, directory: demo.directory } },
-  }
-}
-
-function currentMessage(message: (typeof demo.messages)[string][number]) {
-  if (message.info.role === "user")
-    return {
-      id: message.info.id,
-      type: "user",
-      time: message.info.time,
-      text: message.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("\n"),
-    }
-  return {
-    id: message.info.id,
-    type: "assistant",
-    time: message.info.time,
-    agent: message.info.agent,
-    model: { id: message.info.modelID, providerID: message.info.providerID },
-    cost: message.info.cost,
-    tokens: message.info.tokens,
-    error: message.info.error,
-    content: message.parts.flatMap<unknown>((part) => {
-      if (part.type === "text" || part.type === "reasoning") return [{ type: part.type, text: part.text }]
-      if (part.type !== "tool") return []
-      const state = part.state
-      return [
-        {
-          type: "tool",
-          id: part.id,
-          name: part.tool,
-          time: "time" in state ? state.time : { created: message.info.time.created },
-          state:
-            state.status === "pending"
-              ? { status: "streaming", input: state.raw }
-              : state.status === "completed"
-                ? {
-                    status: "completed",
-                    input: state.input,
-                    structured: state.metadata,
-                    content: [{ type: "text", text: state.output }],
-                  }
-                : state.status === "error"
-                  ? {
-                      status: "error",
-                      input: state.input,
-                      structured: state.metadata ?? {},
-                      content: [],
-                      error: { type: "ToolError", message: state.error },
-                    }
-                  : { status: "running", input: state.input, structured: state.metadata ?? {}, content: [] },
-        },
-      ]
-    }),
   }
 }

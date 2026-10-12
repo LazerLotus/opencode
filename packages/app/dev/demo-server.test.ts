@@ -89,19 +89,17 @@ describe("development demo server", () => {
       expect(resolved.additionLines.length).toBeGreaterThan(0)
     }
   })
-  test("paginates current message history using the fixture cursor", async () => {
-    const response = await fetch(`${state.url}/__demo/api/session/${demo.sessionID}/message?limit=2`)
+  test("paginates legacy history using the fixture cursor", async () => {
+    const response = await fetch(`${state.url}/__demo/session/${demo.sessionID}/message?limit=2`)
     const page = await response.json()
-    expect(page.data.map((message: { id: string }) => message.id)).toEqual(["msg_demo_04", "msg_demo_03"])
-    expect(page.cursor.next).toBe("msg_demo_03")
-    const previous = await (
-      await fetch(`${state.url}/__demo/api/session/${demo.sessionID}/message?limit=2&cursor=${page.cursor.next}`)
-    ).json()
-    expect(previous.data.map((message: { id: string }) => message.id)).toEqual(["msg_demo_02", "msg_demo_01"])
-    expect(previous.data[0].content).toEqual(
-      expect.arrayContaining([expect.objectContaining({ type: "tool", name: "edit" })]),
-    )
-    expect(previous.cursor).toEqual({})
+    expect(page.map((message: { info: { id: string } }) => message.info.id)).toEqual(["msg_demo_03", "msg_demo_04"])
+    expect(response.headers.get("x-next-cursor")).toBe("msg_demo_03")
+    const previous = await fetch(`${state.url}/__demo/session/${demo.sessionID}/message?limit=2&before=msg_demo_03`)
+    const messages = await previous.json()
+    expect(messages.map((message: { info: { id: string } }) => message.info.id)).toEqual(["msg_demo_01", "msg_demo_02"])
+    expect(messages[1].parts).toEqual(expect.arrayContaining([expect.objectContaining({ type: "tool", tool: "edit" })]))
+    expect(previous.headers.get("x-next-cursor")).toBeNull()
+    expect((await fetch(`${state.url}/__demo/api/session/${demo.sessionID}/message`)).status).toBe(404)
   })
   test("serves distinct permission, question, and failed tool scenarios", async () => {
     expect(await (await fetch(`${state.url}/__demo/permission`)).json()).toEqual(demo.permissions)

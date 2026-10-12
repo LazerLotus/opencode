@@ -46,7 +46,8 @@ export const demoFetch = Object.assign(
   (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
     const request = new Request(input, init)
     const url = new URL(request.url)
-    if (url.origin !== location.origin) return fetch(request)
+    if (url.origin !== location.origin)
+      return Promise.reject(new Error("The read-only demo cannot connect to another server."))
     if (!url.pathname.startsWith("/__demo/")) url.pathname = `/__demo${url.pathname}`
     return fetch(new Request(url, request))
   },

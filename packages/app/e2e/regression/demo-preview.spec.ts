@@ -55,3 +55,24 @@ test("shows populated home and keeps the demo controls reachable on mobile", asy
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   await page.screenshot({ path: testInfo.outputPath("mobile.png") })
 })
+
+test("rejects external API mutations before issuing a network request", async ({ page }) => {
+  const external: string[] = []
+  page.on("request", (request) => {
+    if (request.url().startsWith("https://demo-external.invalid/")) external.push(request.url())
+  })
+  await page.goto("/")
+  const result = await page.evaluate(async () => {
+    const modulePath = "/dev/demo-browser.ts"
+    const { demoFetch } = await import(modulePath)
+    return demoFetch("https://demo-external.invalid/session/example/prompt_async", {
+      method: "POST",
+      body: JSON.stringify({ parts: [{ type: "text", text: "Do not execute" }] }),
+    }).then(
+      () => "Unexpected success",
+      (error: Error) => error.message,
+    )
+  })
+  expect(result).toBe("The read-only demo cannot connect to another server.")
+  expect(external).toEqual([])
+})

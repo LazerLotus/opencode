@@ -613,8 +613,8 @@
   }
 }
 
-/* The current interface keeps its mounted home/session controls inside each composition. */
-@media (min-width: 1100px) {
+/* Short windows retain the horizontal header so the design picker stays reachable. */
+@media (min-width: 1100px) and (min-height: 650px) {
   [data-world="quanta"] .world-body,
   [data-world="raidweaver"] .world-body {
     flex-direction: row;
@@ -648,6 +648,9 @@
     height: 210px;
     align-self: center;
   }
+}
+
+@media (min-width: 1100px) {
   [data-world="chorus"] .world-body {
     flex-direction: column-reverse;
   }

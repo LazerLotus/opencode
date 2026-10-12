@@ -29,6 +29,7 @@ import { ConstrainDragYAxis, getDraggableId } from "@/utils/solid-dnd"
 import { useDialog } from "@opencode-ai/ui/context/dialog"
 
 import FileTree from "@/components/file-tree"
+import { resolveWorldDesign } from "@/components/world-design"
 import { normalizeFileTreeV2Path } from "@/components/file-tree-v2-model"
 import { SessionContextUsage } from "@/components/session-context-usage"
 
@@ -846,7 +847,11 @@ export function SessionSidePanel(props: {
                   <div onPointerDown={() => props.size.start()}>
                     <ResizeHandle
                       direction="horizontal"
-                      edge="start"
+                      edge={
+                        !reviewOpen() && resolveWorldDesign(settings.appearance.design()).navigation === "end"
+                          ? "end"
+                          : "start"
+                      }
                       size={fileTreeWidth()}
                       min={FILE_TREE_WIDTH_MIN}
                       max={480}

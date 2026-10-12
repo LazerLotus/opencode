@@ -161,3 +161,48 @@ test("rearranges home navigation while retaining a separately selected theme", a
   await expect(page.locator('[data-action="world-design"]')).toHaveValue("kinetic")
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dracula")
 })
+
+test("keeps side-dock selectors reachable in short desktop windows", async ({ page }) => {
+  for (const height of [522, 600, 720]) {
+    await page.setViewportSize({ width: 1600, height })
+    for (const design of ["quanta", "raidweaver"]) {
+      const picker = page.locator('[data-action="world-design"]')
+      await picker.selectOption(design)
+      const box = await picker.boundingBox()
+      expect(box!.y + box!.height).toBeLessThanOrEqual(height)
+      expect(
+        await picker.evaluate((node) => {
+          const box = node.getBoundingClientRect()
+          return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2) === node
+        }),
+      ).toBe(true)
+    }
+  }
+})
+
+test("resizes a file-only inspector from the conversation boundary", async ({ page }) => {
+  await page.evaluate(() => {
+    const settings = JSON.parse(localStorage.getItem("settings.v3")!)
+    settings.general.showFileTree = true
+    localStorage.setItem("settings.v3", JSON.stringify(settings))
+    const layout = JSON.parse(localStorage.getItem("opencode.global.dat:layout") ?? "{}")
+    layout.fileTree = { opened: true, width: 280, tab: "all" }
+    localStorage.setItem("opencode.global.dat:layout", JSON.stringify(layout))
+  })
+  await page.reload()
+  await page.setViewportSize({ width: 1600, height: 1000 })
+  await page.locator('[data-action="world-design"]').selectOption("parallax")
+  const review = page.getByRole("button", { name: "Toggle review", exact: true })
+  if ((await review.getAttribute("aria-expanded")) === "true") await review.click()
+  const inspector = page.locator("#review-panel")
+  await expect(inspector).toBeVisible()
+  const before = await inspector.boundingBox()
+  const handle = inspector.locator('[data-component="resize-handle"]').last()
+  const box = await handle.boundingBox()
+  expect(box!.x).toBeGreaterThan(before!.x + before!.width - 12)
+  await page.mouse.move(box!.x + 1, box!.y + box!.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box!.x + 60, box!.y + box!.height / 2)
+  await page.mouse.up()
+  await expect.poll(async () => (await inspector.boundingBox())!.width).toBeGreaterThan(before!.width + 40)
+})

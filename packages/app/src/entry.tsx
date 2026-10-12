@@ -12,6 +12,9 @@ import { authFromToken } from "@/utils/server"
 import pkg from "../package.json"
 import { ServerConnection } from "./context/server"
 
+const demo = import.meta.env.DEV && import.meta.env.MODE === "demo" ? await import("../dev/demo-browser") : undefined
+demo?.prepareDemo()
+
 const DEFAULT_SERVER_URL_KEY = "opencode.settings.dat:defaultServerUrl"
 
 const getLocale = () => {
@@ -97,6 +100,7 @@ if (!(root instanceof HTMLElement) && import.meta.env.DEV) {
 }
 
 const getCurrentUrl = () => {
+  if (import.meta.env.DEV && import.meta.env.MODE === "demo") return `${location.origin}/__demo`
   if (location.hostname.includes("opencode.ai")) return "http://localhost:4096"
   if (import.meta.env.DEV)
     return `http://${import.meta.env.VITE_OPENCODE_SERVER_HOST ?? "localhost"}:${import.meta.env.VITE_OPENCODE_SERVER_PORT ?? "4096"}`
@@ -104,6 +108,7 @@ const getCurrentUrl = () => {
 }
 
 const getDefaultUrl = () => {
+  if (import.meta.env.DEV && import.meta.env.MODE === "demo") return getCurrentUrl()
   const lsDefault = readDefaultServerUrl()
   if (lsDefault) return lsDefault
   return getCurrentUrl()
@@ -118,12 +123,14 @@ const clearAuthToken = () => {
 
 const platform: Platform = {
   platform: "web",
+  fetch: demo?.demoFetch,
   draftStore: createBrowserDraftStore(),
   version: pkg.version,
   openExternal,
   restart,
   notify,
   getDefaultServer: async () => {
+    if (import.meta.env.DEV && import.meta.env.MODE === "demo") return ServerConnection.Key.make(getCurrentUrl())
     const stored = readDefaultServerUrl()
     return stored ? ServerConnection.Key.make(stored) : null
   },

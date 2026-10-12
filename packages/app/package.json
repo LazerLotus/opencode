@@ -17,6 +17,7 @@
     "typecheck:e2e": "tsgo -p e2e/tsconfig.json",
     "start": "vite",
     "dev": "vite",
+    "dev:demo": "vite --mode demo --host 127.0.0.1 --port 3013 --strictPort",
     "build": "vite build",
     "serve": "vite preview",
     "test": "bun run test:unit && bun run test:browser",

@@ -19,15 +19,22 @@ const sentry =
       })
     : false
 
-export default defineConfig({
-  plugins: [desktopPlugin, sentry] as any,
-  server: {
-    host: "0.0.0.0",
-    allowedHosts: true,
-    port: 3000,
-  },
-  build: {
-    target: "esnext",
-    sourcemap: true,
-  },
+export default defineConfig(async ({ mode, command }) => {
+  const plugins = [desktopPlugin, sentry]
+  if (command === "serve" && mode === "demo") {
+    const { demoServer } = await import("./dev/demo-server")
+    plugins.push(demoServer())
+  }
+  return {
+    plugins,
+    server: {
+      host: "0.0.0.0",
+      allowedHosts: true,
+      port: 3000,
+    },
+    build: {
+      target: "esnext",
+      sourcemap: true,
+    },
+  }
 })
